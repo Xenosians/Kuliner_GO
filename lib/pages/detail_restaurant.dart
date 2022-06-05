@@ -1,16 +1,28 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kuliner_go/components/api_consumer.dart';
 import 'package:kuliner_go/pages/reservation.dart';
-import 'package:kuliner_go/pages/review.dart';
+import 'package:kuliner_go/pages/review_page.dart';
+import 'package:kuliner_go/components/review_card.dart';
 
 class DetailRestaurant extends StatefulWidget {
-  const DetailRestaurant({Key? key}) : super(key: key);
+  final Restaurant restaurant;
+
+  const DetailRestaurant({
+    Key? key,
+    required this.restaurant,
+  }) : super(key: key);
 
   @override
   State<DetailRestaurant> createState() => _DetailRestaurantState();
 }
 
 class _DetailRestaurantState extends State<DetailRestaurant> {
+  bool jamBuka = false;
+  bool kisaranHarga = false, daftarMenu = false, alamatRestoran = false;
+
   @override
   Widget build(BuildContext context) {
     MediaQueryData _mediaQueryData = MediaQuery.of(context);
@@ -67,7 +79,7 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextButton(
-                        onPressed: () => {},
+                        onPressed: () => {Navigator.pop(context, true)},
                         child: Icon(
                           Icons.keyboard_arrow_left,
                           color: Colors.black,
@@ -91,7 +103,7 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                 ),
                 Container(
                   child: Image(
-                    image: AssetImage("assets/mcd_profile.png"),
+                    image: NetworkImage(widget.restaurant.picture),
                     fit: BoxFit.cover,
                   ),
                   decoration: BoxDecoration(
@@ -112,7 +124,7 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                "McDonald's",
+                                "${widget.restaurant.name}",
                                 style: GoogleFonts.poppins(
                                   fontSize: 23,
                                   fontWeight: FontWeight.w600,
@@ -165,7 +177,7 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                         Padding(
                           padding: EdgeInsets.fromLTRB(10.0, 6, 10.0, 10.0),
                           child: Text(
-                            "Franchise makanan cepat saji klasik yang telah lama berdiri, terkenal dengan burger dan kentang gorengnya",
+                            "${widget.restaurant.detail}",
                             style: GoogleFonts.poppins(
                               fontSize: 13.0,
                               color: Colors.grey[600],
@@ -176,7 +188,11 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                           child: Column(
                             children: [
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    jamBuka = jamBuka ? false : true;
+                                  });
+                                },
                                 child: Container(
                                   // color: Colors.amber,
                                   height: 43.0,
@@ -210,8 +226,34 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                                   ),
                                 ),
                               ),
+                              Visibility(
+                                maintainAnimation: true,
+                                maintainState: true,
+                                visible: jamBuka,
+                                child: Container(
+                                  height: 43.0,
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10.0),
+                                        child: Text(
+                                          '${widget.restaurant.openHours}',
+                                          style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 16),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    kisaranHarga = kisaranHarga ? false : true;
+                                  });
+                                },
                                 child: Container(
                                   // color: Colors.amber,
                                   height: 43.0,
@@ -245,8 +287,34 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                                   ),
                                 ),
                               ),
+                              Visibility(
+                                maintainAnimation: true,
+                                maintainState: true,
+                                visible: kisaranHarga,
+                                child: Container(
+                                  height: 43.0,
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10.0),
+                                        child: Text(
+                                          '${widget.restaurant.harga}',
+                                          style: GoogleFonts.poppins(
+                                              fontWeight: FontWeight.w500,
+                                              fontSize: 16),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    daftarMenu = daftarMenu ? false : true;
+                                  });
+                                },
                                 child: Container(
                                   // color: Colors.amber,
                                   height: 43.0,
@@ -280,8 +348,36 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                                   ),
                                 ),
                               ),
+                              Visibility(
+                                maintainAnimation: true,
+                                maintainState: true,
+                                visible: daftarMenu,
+                                child: Container(
+                                  height: 43.0,
+                                  child: Row(
+                                    children: [
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10.0),
+                                        child: Text(
+                                          '${widget.restaurant.openHours}',
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                               TextButton(
-                                onPressed: () {},
+                                onPressed: () {
+                                  setState(() {
+                                    alamatRestoran =
+                                        alamatRestoran ? false : true;
+                                  });
+                                },
                                 child: Container(
                                   // color: Colors.amber,
                                   height: 43.0,
@@ -315,37 +411,25 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                                   ),
                                 ),
                               ),
-                              TextButton(
-                                onPressed: () {},
+                              Visibility(
+                                maintainAnimation: true,
+                                maintainState: true,
+                                visible: alamatRestoran,
                                 child: Container(
-                                  // color: Colors.amber,
                                   height: 43.0,
                                   child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.more_horiz_sharp,
-                                            color: Colors.black,
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(left: 10.0),
+                                        child: Text(
+                                          '${widget.restaurant.location}',
+                                          style: GoogleFonts.poppins(
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16,
                                           ),
-                                          Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 10.0,
-                                            ),
-                                            child: Text(
-                                              "Fasilitas",
-                                              style: GoogleFonts.poppins(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w600,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
+                                        ),
                                       ),
-                                      Icon(Icons.keyboard_arrow_down,
-                                          color: Colors.grey[350]),
                                     ],
                                   ),
                                 ),
@@ -393,7 +477,7 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                                                         vertical: 8.0,
                                                         horizontal: 12.0),
                                                 child: Text(
-                                                  "4.7/5",
+                                                  "${widget.restaurant.rating}/5",
                                                   style: GoogleFonts.poppins(
                                                     fontSize: 20,
                                                     fontWeight: FontWeight.w600,
@@ -406,7 +490,7 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                                                         vertical: 4.0,
                                                         horizontal: 12.0),
                                                 child: Text(
-                                                  "Berdasarkan 471 Ulasan",
+                                                  "Berdasarkan ${widget.restaurant.reviews.length} Ulasan",
                                                   style: GoogleFonts.poppins(
                                                     fontSize: 12.0,
                                                     color: Colors.grey[600],
@@ -450,7 +534,9 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => Review(),
+                                      builder: (context) => ReviewPage(
+                                        restaurant: widget.restaurant,
+                                      ),
                                     ),
                                   );
                                 },
@@ -486,208 +572,14 @@ class _DetailRestaurantState extends State<DetailRestaurant> {
                                   ),
                                 ),
                               ),
-                              Container(
-                                margin: EdgeInsets.symmetric(vertical: 8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12.0,
-                                      ),
-                                      child: Container(
-                                        padding: EdgeInsets.all(17),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[100],
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      backgroundImage:
-                                                          AssetImage(
-                                                        "assets/reviewprofilepict1.png",
-                                                      ),
-                                                      radius: 20,
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          horizontal: 15.0),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Padding(
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                              vertical: 5.0,
-                                                            ),
-                                                            child: Text(
-                                                              "Magzy Bogues",
-                                                              style: GoogleFonts
-                                                                  .poppins(),
-                                                            ),
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 14.0,
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    '"Penjual sangat ramah"',
-                                                    style: GoogleFonts.poppins(
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              Container(
-                                margin: EdgeInsets.symmetric(vertical: 8.0),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12.0,
-                                      ),
-                                      child: Container(
-                                        padding: EdgeInsets.all(17),
-                                        decoration: BoxDecoration(
-                                          color: Colors.grey[100],
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        child: Column(
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    CircleAvatar(
-                                                      backgroundImage:
-                                                          AssetImage(
-                                                        "assets/reviewprofilepict1.png",
-                                                      ),
-                                                      radius: 20,
-                                                    ),
-                                                    Padding(
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          horizontal: 15.0),
-                                                      child: Column(
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .start,
-                                                        children: [
-                                                          Padding(
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                              vertical: 5.0,
-                                                            ),
-                                                            child: Text(
-                                                              "Magzy Bogues",
-                                                              style: GoogleFonts
-                                                                  .poppins(),
-                                                            ),
-                                                          ),
-                                                          Row(
-                                                            children: [
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                              Icon(
-                                                                Icons.star,
-                                                                size: 15.0,
-                                                              ),
-                                                            ],
-                                                          ),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ],
-                                            ),
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 14.0,
-                                              ),
-                                              child: Row(
-                                                children: [
-                                                  Text(
-                                                    '"Penjual sangat ramah"',
-                                                    style: GoogleFonts.poppins(
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              SizedBox(
+                                height: 0.6 * screenHeight,
+                                child: ListView.builder(
+                                  // scrollDirection: Axis.horizontal,
+                                  itemCount: widget.restaurant.reviews.length,
+                                  itemBuilder: (_, index) => ReviewCard(
+                                      restaurant:
+                                          widget.restaurant.reviews[index]),
                                 ),
                               ),
                               SizedBox(

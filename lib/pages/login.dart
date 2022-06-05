@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'dart:ui';
 import 'package:kuliner_go/components/already_have_an_account_acheck.dart';
@@ -8,6 +10,7 @@ import 'package:kuliner_go/components/rounded_password_field.dart';
 import 'package:auth_buttons/auth_buttons.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class Login extends StatefulWidget {
   const Login({Key? key}) : super(key: key);
@@ -20,6 +23,36 @@ class _LoginState extends State<Login> {
   late String email;
   late String password;
   final FirebaseAuth auth = FirebaseAuth.instance;
+
+  _signin(String email, String password) async {
+    try {
+      //Create Get Firebase User
+      await auth.signInWithEmailAndPassword(email: email, password: password);
+      Navigator.pushNamed(context, '/home');
+    } on FirebaseAuthException catch (error) {
+      Fluttertoast.showToast(
+          msg: error.message.toString(), gravity: ToastGravity.TOP);
+    }
+  }
+
+  Future<UserCredential> signInWithGoogle() async {
+    // Trigger the authentication flow
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+
+    // Once signed in, return the UserCredential
+    return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
   @override
   Widget build(BuildContext context) {
     MediaQueryData _mediaQueryData = MediaQuery.of(context);
@@ -114,12 +147,10 @@ class _LoginState extends State<Login> {
                       ),
                       RoundedButton(
                         text: "Masuk",
-
                         press: () {
-                          auth.signInWithEmailAndPassword(email: email, password: password)
-                          .then((_) => Navigator.pushNamed(context, '/home'));
+                          _signin(email, password);
                         },
-                        height: size.height * 0.07,
+                        height: screenHeight * 0.07,
                       ),
                       Text(
                         "masuk dengan",
@@ -131,7 +162,9 @@ class _LoginState extends State<Login> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: <Widget>[
                             GoogleAuthButton(
-                              onPressed: () {},
+                              onPressed: () {
+                                signInWithGoogle();
+                              },
                               darkMode: false,
                               style: AuthButtonStyle(
                                 buttonType: AuthButtonType.icon,

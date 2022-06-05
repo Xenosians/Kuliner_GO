@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kuliner_go/components/restaurant_card.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:kuliner_go/components/api_consumer.dart';
+import 'package:firebase_auth/firebase_auth.dart' as pengguna;
 import 'package:firebase_core/firebase_core.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:async';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -11,12 +15,25 @@ class Home extends StatefulWidget {
   State<Home> createState() => _HomeState();
 }
 
+// Save restaurant list from api_consumer.dart to a variable
+
+// List<int> _list = <int>[];
+//   int operator [](int i) => _list[i];
+//   operator []=(int i, int value) => _list[i] = value;
+//   add(int value) => _list.add(value);
+//   remove(int index) => _list.removeAt(index);
 class _HomeState extends State<Home> {
-  final FirebaseAuth auth = FirebaseAuth.instance;
+  late Future<List<Restaurant>> restaurantList;
+  final pengguna.FirebaseAuth auth = pengguna.FirebaseAuth.instance;
   int _currentIndex = 0;
   Map data = {};
+  void initState() {
+    restaurantList = RestaurantApiConsumer().fetchRestaurants();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final String? _email = auth.currentUser?.email;
     MediaQueryData _mediaQueryData = MediaQuery.of(context);
     double screenWidth = _mediaQueryData.size.width;
     double screenHeight = _mediaQueryData.size.height;
@@ -430,9 +447,28 @@ class _HomeState extends State<Home> {
                             ],
                           ),
                         ),
-                        RestaurantCard(nama: "Warunk Mulya"),
-                        RestaurantCard(nama: "Mororejo"),
-                        RestaurantCard(nama: "Ayam Crisbar"),
+                        // RestaurantCard(nama: "Warunk Mulya"),
+                        // RestaurantCard(nama: "Mororejo"),
+                        // RestaurantCard(nama: "Ayam Crisbar"),
+                        // Make restaurant cards from restaurant list
+                        FutureBuilder<List<Restaurant>>(
+                          future: restaurantList,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return SizedBox(
+                                height: screenHeight * 0.6,
+                                child: ListView.builder(
+                                  // scrollDirection: Axis.horizontal,
+                                  itemCount: snapshot.data!.length,
+                                  itemBuilder: (_, index) => RestaurantCard(
+                                      restaurant: snapshot.data![index]),
+                                ),
+                              );
+                            } else {
+                              return Center(child: CircularProgressIndicator());
+                            }
+                          },
+                        ),
                       ],
                     )),
               ],
@@ -508,9 +544,23 @@ class _HomeState extends State<Home> {
                     ),
                     child: Column(
                       children: [
-                        RestaurantCard(nama: "Warunk Mulya"),
-                        RestaurantCard(nama: "Mororejo"),
-                        RestaurantCard(nama: "Ayam Crisbar"),
+                        FutureBuilder<List<Restaurant>>(
+                          future: restaurantList,
+                          builder: (context, snapshot) {
+                            if (snapshot.hasData) {
+                              return SizedBox(
+                                height: screenHeight * 0.75,
+                                child: ListView.builder(
+                                  itemCount: snapshot.data!.length,
+                                  itemBuilder: (_, index) => RestaurantCard(
+                                      restaurant: snapshot.data![index]),
+                                ),
+                              );
+                            } else {
+                              return Center(child: CircularProgressIndicator());
+                            }
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -712,7 +762,7 @@ class _HomeState extends State<Home> {
                               backgroundColor: Colors.white,
                               child: CircleAvatar(
                                 backgroundImage:
-                                    AssetImage("assets/Ayam Crisbar.png"),
+                                    AssetImage("assets/profilePict.png"),
                                 radius: 50,
                               ),
                             ),
@@ -736,7 +786,7 @@ class _HomeState extends State<Home> {
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         child: Text(
-                          "magnuscarlsen@gmail.com",
+                          _email.toString(),
                           style: GoogleFonts.poppins(
                             fontSize: 14.0,
                             color: Colors.grey[500],
